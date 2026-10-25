@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SCHOOL SERVER - Accesso</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; display: grid; place-items: center;
+    padding: 24px; background: #000000;
+    color: #00ff41; font-family: Consolas, "Courier New", monospace;
+  }
+  .terminal {
+    width: min(760px, 100%); padding: clamp(20px, 4vw, 36px);
+    border: 1px solid #00aa2b; border-radius: 16px;
+    background: #000000;
+    box-shadow: 0 0 30px rgba(0, 255, 65, .12), inset 0 0 24px rgba(0, 255, 65, .04);
+  }
+  .top { display:flex; justify-content:space-between; gap:12px; align-items:center; flex-wrap:wrap; }
+  .dots { color:#00ff41; letter-spacing:5px; }
+  .status { color:#00ff41; font-size:.82rem; border:1px solid currentColor; padding:6px 10px; border-radius:20px; }
+  h1 { margin:26px 0 6px; font-size:clamp(1.45rem, 4vw, 2.2rem); letter-spacing:.08em; color:#00ff41; }
+  .sub { color:#00bb32; margin:0 0 24px; font-size:.9rem; }
+  .instruction { line-height:1.55; color:#00dd38; }
+  .grid { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:12px; margin:22px 0; }
+  label { display:block; color:#00cc35; font-size:.78rem; margin-bottom:6px; }
+  input {
+    width:100%; padding:13px 12px; border:1px solid #008c25; border-radius:8px;
+    background:#000000; color:#00ff41; font:inherit; text-transform:uppercase;
+    outline:none; min-width:0;
+  }
+  input:focus { border-color:#00ff41; box-shadow:0 0 0 3px rgba(0,255,65,.15); }
+  button {
+    width:100%; border:0; border-radius:8px; padding:15px; cursor:pointer;
+    background:#00cc35; color:#000000; font:700 1rem Consolas, monospace;
+    letter-spacing:.08em;
+  }
+  button:hover { background:#00ff41; }
+  #message { min-height:56px; margin-top:18px; padding:14px; border-radius:8px;
+    border:1px solid #006b1c; color:#00bb32; line-height:1.5; }
+  #message.error { color:#00ff41; border-color:#00aa2b; background:rgba(0,255,65,.08); }
+  #message.success { color:#00ff41; border-color:#00cc35; background:rgba(0,255,65,.10); }
+  .footer { margin-top:18px; color:#008c25; font-size:.72rem; display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .unlocked { animation:pulse .8s ease-in-out 2; }
+  @keyframes pulse { 50% { box-shadow:0 0 45px rgba(0,255,65,.35); } }
+  @media (max-width:520px) { .grid { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<main class="terminal" id="terminal">
+  <div class="top">
+    <span class="dots">● ● ●</span>
+    <span class="status" id="status">● SISTEMA BLOCCATO</span>
+  </div>
+  <h1>SCHOOL SERVER</h1>
+  <p class="sub">CENTRAL AUTHENTICATION TERMINAL // v.3.8.2</p>
+  <p class="instruction">
+    Il server scolastico è stato isolato. Inserisci le <strong>8 chiavi di sicurezza</strong>
+    nell'ordine corretto per ripristinare il sistema.
+  </p>
+
+  <form id="accessForm" autocomplete="off">
+    <div class="grid">
+      <div><label for="key1">CHIAVE 01</label><input id="key1" maxlength="20" spellcheck="false" placeholder="INSERISCI STRINGA"></div>
+      <div><label for="key2">CHIAVE 02</label><input id="key2" maxlength="20" spellcheck="false" placeholder="INSERISCI STRINGA"></div>
+      <div><label for="key3">CHIAVE 03</label><input id="key3" maxlength="20" spellcheck="false" placeholder="INSERISCI STRINGA"></div>
+      <div><label for="key4">CHIAVE 04</label><input id="key4" maxlength="20" spellcheck="false" placeholder="INSERISCI STRINGA"></div>
+      <div><label for="key5">CHIAVE 05</label><input id="key5" maxlength="20" spellcheck="false" placeholder="INSERISCI STRINGA"></div>
+      <div><label for="key6">CHIAVE 06</label><input id="key6" maxlength="20" spellcheck="false" placeholder="INSERISCI STRINGA"></div>
+      <div><label for="key7">CHIAVE 07</label><input id="key7" maxlength="20" spellcheck="false" placeholder="INSERISCI STRINGA"></div>
+      <div><label for="key8">CHIAVE 08</label><input id="key8" maxlength="20" spellcheck="false" placeholder="INSERISCI STRINGA"></div>
+    </div>
+    <button type="submit">▶ AUTENTICA ACCESSO</button>
+  </form>
+
+  <div id="message" role="status" aria-live="polite">IN ATTESA DI AUTENTICAZIONE...</div>
+  <div class="footer"><span>RETE DIDATTICA // SIMULAZIONE</span><span>ACCESSO RISERVATO</span></div>
+</main>
+<script>
+  // Chiavi dimostrative dell'escape room: non sono credenziali reali.
+  const correctKeys = [
+    "SCH_7K29", "EDU_4M81", "SYS_93QX", "NET_2P64",
+    "ADM_8R31", "SEC_5T72", "CORE_6W19", "UNLOCK_2026"
+  ];
+
+  const form = document.getElementById("accessForm");
+  const message = document.getElementById("message");
+  const status = document.getElementById("status");
+  const terminal = document.getElementById("terminal");
+
+  form.addEventListener("submit", function (event) {
+    event.preventDefault();
+    const enteredKeys = Array.from({length: 8}, (_, i) =>
+      document.getElementById("key" + (i + 1)).value.trim().toUpperCase()
+    );
+
+    if (enteredKeys.some(key => key === "")) {
+      message.className = "error";
+      message.textContent = "ERRORE: INSERIRE TUTTE LE 8 CHIAVI.";
+      return;
+    }
+
+    const isCorrect = enteredKeys.every((key, i) => key === correctKeys[i]);
+
+    if (isCorrect) {
+      message.className = "success";
+      message.textContent = "✓ ACCESS GRANTED — SERVER RIPRISTINATO. BENVENUTI NEL SISTEMA SCOLASTICO!";
+      status.textContent = "● SISTEMA SBLOCCATO";
+      status.style.color = "#00ff41";
+      terminal.classList.add("unlocked");
+    } else {
+      message.className = "error";
+      message.textContent = "✕ ACCESS DENIED — UNA O PIÙ CHIAVI SONO ERRATE O FUORI ORDINE. RICONTROLLA GLI INDIZI.";
+    }
+  });
+</script>
+</body>
+</html>
